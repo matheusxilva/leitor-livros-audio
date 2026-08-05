@@ -1,0 +1,4 @@
+streamlit
+pypdf
+edge-tts
+google-generativeai
