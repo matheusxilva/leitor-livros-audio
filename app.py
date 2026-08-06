@@ -11,11 +11,22 @@ st.set_page_config(page_title="Leitor de Livros", page_icon="🎧", layout="cent
 st.title("🎧 Ouvir Livro por Capítulos")
 st.caption("Gere o áudio por trechos para ser muito mais rápido e não travar!")
 
+# --- NOVIDADE: Memória do Aplicativo (Session State) ---
+if "api_key" not in st.session_state:
+    st.session_state.api_key = ""
+
 # Barra lateral
 with st.sidebar:
-    st.header("Configurações")
-    gemini_key = st.text_input("Sua chave de API do Gemini:", type="password")
+    st.header("⚙️ Configurações")
+    st.markdown("Para usar o app, insira sua chave do Google Gemini.")
     
+    # O navegador do cliente vai perguntar se ele quer salvar essa "senha" para a próxima visita!
+    chave_digitada = st.text_input("Sua chave de API:", type="password", value=st.session_state.api_key)
+    
+    if chave_digitada:
+        st.session_state.api_key = chave_digitada
+        
+    st.markdown("---")
     opcoes_vozes = {
         "pt-BR-FranciscaNeural": "🇧🇷 Francisca (Feminina)",
         "pt-BR-AntonioNeural": "🇧🇷 Antonio (Masculino)",
@@ -45,17 +56,15 @@ def extract_text_from_pdf(pdf_file, start_page, end_page):
 def clean_text_with_gemini(raw_text, api_key):
     genai.configure(api_key=api_key)
     
-    # Busca a lista de modelos disponíveis
+    # Busca um modelo Flash (rápido e com limite alto de uso gratuito)
     modelo_escolhido = None
     modelos_disponiveis = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
     
-    # Força o aplicativo a escolher os modelos Flash mais novos e com maior limite gratuito
     for nome in modelos_disponiveis:
         if 'flash' in nome and ('3.6' in nome or '3.5' in nome):
             modelo_escolhido = nome
             break
             
-    # Se não achar nenhum com 3, pega o último da lista (geralmente o mais recente)
     if not modelo_escolhido and modelos_disponiveis:
         modelo_escolhido = modelos_disponiveis[-1]
         
@@ -64,7 +73,7 @@ def clean_text_with_gemini(raw_text, api_key):
         
     model = genai.GenerativeModel(modelo_escolhido)
     
-    # ⚠️ A MÁGICA: DESLIGANDO OS FILTROS DE SEGURANÇA
+    # MÁGICA: Filtros de segurança desligados para ler conteúdos sensíveis (como no livro O Poder do Hábito)
     safety_settings = [
         {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
         {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
@@ -101,17 +110,17 @@ if uploaded_file:
         
     st.caption("💡 *Dica: Recomendamos gerar blocos de 10 a 20 páginas por vez (ex: um capítulo).*")
 
-    if gemini_key:
+    # Verifica se há uma chave salva na memória da sessão
+    if st.session_state.api_key:
         if st.button("🚀 Converter Trecho em Áudio", use_container_width=True):
             with st.spinner(f"1/3 Extraindo texto das páginas {start_page} a {end_page}..."):
                 raw_text = extract_text_from_pdf(uploaded_file, start_page, end_page)
                 
             with st.spinner("2/3 Gemini limpando o texto (Filtros desativados)..."):
                 try:
-                    cleaned_text = clean_text_with_gemini(raw_text, gemini_key)
+                    cleaned_text = clean_text_with_gemini(raw_text, st.session_state.api_key)
                     st.success("✨ Texto limpo pelo Gemini com sucesso!")
                 except Exception as e:
-                    # Agora, se der erro, ele vai te fofocar exatamente o que o servidor do Google recusou
                     st.error(f"🚨 Erro exato do Gemini: {e}")
                     st.warning("Gerando áudio com o texto original bruto...")
                     cleaned_text = raw_text 
@@ -134,4 +143,4 @@ if uploaded_file:
                         use_container_width=True
                     )
     else:
-        st.warning("Insira sua chave do Gemini na barra lateral para continuar.")
+        st.warning("👈 Insira sua chave do Gemini na barra lateral para liberar o conversor.")
