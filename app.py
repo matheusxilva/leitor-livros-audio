@@ -21,11 +21,23 @@ with st.sidebar:
     st.header("Configurações")
     gemini_key = st.text_input("Sua chave de API do Gemini:", type="password")
     
-    # Seleção da voz em Português (Edge-TTS)
+    # Dicionário com várias opções de vozes
+    opcoes_vozes = {
+        "pt-BR-FranciscaNeural": "🇧🇷 Francisca (Feminina)",
+        "pt-BR-AntonioNeural": "🇧🇷 Antonio (Masculino)",
+        "pt-BR-ThalitaNeural": "🇧🇷 Thalita (Feminina)",
+        "pt-PT-DuarteNeural": "🇵🇹 Duarte (Portugal - Masculino)",
+        "pt-PT-RaquelNeural": "🇵🇹 Raquel (Portugal - Feminina)",
+        "en-US-AriaNeural": "🇺🇸 Aria (Inglês EUA - Feminina)",
+        "en-US-GuyNeural": "🇺🇸 Guy (Inglês EUA - Masculino)"
+    }
+    
+    # Seleção da voz (Edge-TTS)
     voice_option = st.selectbox(
         "Escolha a voz:",
-        options=["pt-BR-FranciscaNeural", "pt-BR-AntonioNeural"],
-        format_func=lambda x: "Francisca (Feminina)" if "Francisca" in x else "Antonio (Masculino)"
+        options=list(opcoes_vozes.keys()),
+        format_func=lambda x: opcoes_vozes[x]
+    )
     )
 
 # Função para extrair texto do PDF
