@@ -49,9 +49,9 @@ def clean_text_with_gemini(raw_text, api_key):
     modelo_escolhido = None
     modelos_disponiveis = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
     
-    # Força o aplicativo a escolher um modelo de geração 3 (como o 3.6 Flash ou 3.5 Flash)
+    # Força o aplicativo a escolher os modelos Flash mais novos e com maior limite gratuito
     for nome in modelos_disponiveis:
-        if '3.6' in nome or '3.5' in nome or '3.1' in nome:
+        if 'flash' in nome and ('3.6' in nome or '3.5' in nome):
             modelo_escolhido = nome
             break
             
