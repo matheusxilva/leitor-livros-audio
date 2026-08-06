@@ -45,19 +45,26 @@ def extract_text_from_pdf(pdf_file, start_page, end_page):
 def clean_text_with_gemini(raw_text, api_key):
     genai.configure(api_key=api_key)
     
-    # Busca dinamicamente o modelo que estiver funcionando na sua chave
+    # Busca a lista de modelos disponíveis
     modelo_escolhido = None
-    for m in genai.list_models():
-        if 'generateContent' in m.supported_generation_methods:
-            modelo_escolhido = m.name
+    modelos_disponiveis = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+    
+    # Força o aplicativo a escolher um modelo de geração 3 (como o 3.6 Flash ou 3.5 Flash)
+    for nome in modelos_disponiveis:
+        if '3.6' in nome or '3.5' in nome or '3.1' in nome:
+            modelo_escolhido = nome
             break
             
+    # Se não achar nenhum com 3, pega o último da lista (geralmente o mais recente)
+    if not modelo_escolhido and modelos_disponiveis:
+        modelo_escolhido = modelos_disponiveis[-1]
+        
     if not modelo_escolhido:
         raise Exception("Nenhum modelo de texto compatível encontrado para esta chave.")
         
     model = genai.GenerativeModel(modelo_escolhido)
     
-    # ⚠️ A MÁGICA: DESLIGANDO OS FILTROS DE SEGURANÇA PARA LER SOBRE TUDO
+    # ⚠️ A MÁGICA: DESLIGANDO OS FILTROS DE SEGURANÇA
     safety_settings = [
         {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
         {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
