@@ -52,7 +52,7 @@ def extract_text_from_pdf(pdf_file):
 # Função para limpar o texto com o Gemini Pro
 def clean_text_with_gemini(raw_text, api_key):
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-pro')
+    model = genai.GenerativeModel('gemini-pro')
     
     prompt = (
         "Você é um assistente especializado em preparar textos de livros para narração em áudio. "
