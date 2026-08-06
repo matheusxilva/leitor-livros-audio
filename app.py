@@ -38,7 +38,6 @@ with st.sidebar:
         options=list(opcoes_vozes.keys()),
         format_func=lambda x: opcoes_vozes[x]
     )
-    )
 
 # Função para extrair texto do PDF
 def extract_text_from_pdf(pdf_file):
@@ -109,4 +108,3 @@ if uploaded_file and gemini_key:
                 )
 elif uploaded_file and not gemini_key:
     st.warning("Insira sua chave do Gemini Pro na barra lateral para continuar.")
-  
