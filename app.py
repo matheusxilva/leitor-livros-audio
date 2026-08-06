@@ -51,11 +51,21 @@ def extract_text_from_pdf(pdf_file, start_page, end_page):
             text += extracted + "\n"
     return text
 
-# Função para limpar o texto com o modelo mais universal do Gemini
+# Função para limpar o texto de forma inteligente (busca o modelo automático)
 def clean_text_with_gemini(raw_text, api_key):
     genai.configure(api_key=api_key)
-    # Usando o modelo base que não dá erro 404 em contas gratuitas novas
-    model = genai.GenerativeModel('gemini-1.0-pro')
+    
+    # Pergunta ao servidor do Google quais modelos estão liberados para a sua chave
+    modelo_escolhido = None
+    for m in genai.list_models():
+        if 'generateContent' in m.supported_generation_methods:
+            modelo_escolhido = m.name
+            break # Pega o primeiro modelo compatível que o Google oferecer
+            
+    if not modelo_escolhido:
+        raise Exception("Nenhum modelo de texto compatível encontrado para esta chave de API.")
+        
+    model = genai.GenerativeModel(modelo_escolhido)
     
     prompt = (
         "Você é um assistente que prepara textos para narração em áudio. "
